@@ -1,0 +1,47 @@
+# Gowin EDA generated files
+impl/
+*.fs
+*.bin
+*.sdf
+*.vg
+*.vm
+*.rpt.html
+*.tr
+*_syn.v
+*_pr.v
+prim_sim.v
+tmp/
+work/
+*.log
+
+# Gowin project backups
+*.gprj.bak
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# ROM files (copyrighted — do not commit)
+bios/*.rom
+bios/*.ROM
+# But keep the generated .mem if it's from C-BIOS (open source)
+# bios/*.mem  ← commented out: C-BIOS .mem can be committed
+
+# Simulation outputs
+*.vcd
+*.lxt
+*.fst
+sim/waves/

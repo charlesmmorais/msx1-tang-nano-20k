@@ -1,0 +1,39 @@
+name: Documentation Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check-docs:
+    runs-on: ubuntu-latest
+    name: Check Documentation
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Check all README files exist
+      run: |
+        FILES=("README.md" "README.pt-BR.md" "README.es.md" "README.fr.md" "README.it.md")
+        for f in "${FILES[@]}"; do
+          if [ ! -f "$f" ]; then
+            echo "❌ Missing: $f"
+            exit 1
+          fi
+          echo "✅ Found: $f ($(wc -l < $f) lines)"
+        done
+
+    - name: Check minimum README size
+      run: |
+        MIN_LINES=100
+        for f in README*.md; do
+          LINES=$(wc -l < "$f")
+          if [ $LINES -lt $MIN_LINES ]; then
+            echo "❌ $f is too short ($LINES lines, min $MIN_LINES)"
+            exit 1
+          fi
+          echo "✅ $f: $LINES lines"
+        done
