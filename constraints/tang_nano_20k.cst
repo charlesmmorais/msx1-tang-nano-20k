@@ -1,81 +1,61 @@
 // =============================================================================
-// Constraints de pinagem — Tang Nano 20K (Gowin GW2AR-18C)
-// MSX1 FPGA
+// Pin constraints — Tang Nano 20K (GW2AR-LV18QN88C8/I7, QFN88 package)
+// Pin numbers follow Sipeed's Tang Nano 20K schematic and examples.
+//
+// The embedded SDRAM (O_sdram_* / IO_sdram_dq) is inside the GW2AR package
+// and is routed automatically: it must NOT be listed here.
 // =============================================================================
 
-// Clock principal (27 MHz onboard crystal)
-IO_LOC "sys_clk" 4;
-IO_PORT "sys_clk" IO_TYPE=LVCMOS33;
+// 27 MHz crystal
+IO_LOC  "sys_clk" 4;
+IO_PORT "sys_clk" IO_TYPE=LVCMOS33 PULL_MODE=UP;
 
-// Botão reset (S1 — ativo baixo)
-IO_LOC "sys_rst_n" T2;
-IO_PORT "sys_rst_n" IO_TYPE=LVCMOS18, PULL_MODE=UP;
+// Buttons S1 / S2 (high when pressed)
+IO_LOC  "btn_s1" 88;
+IO_PORT "btn_s1" IO_TYPE=LVCMOS33 PULL_MODE=NONE;
+IO_LOC  "btn_s2" 87;
+IO_PORT "btn_s2" IO_TYPE=LVCMOS33 PULL_MODE=NONE;
 
-// Botões auxiliares
-IO_LOC "btn1" T3;
-IO_PORT "btn1" IO_TYPE=LVCMOS18, PULL_MODE=UP;
-IO_LOC "btn2" T2;
-IO_PORT "btn2" IO_TYPE=LVCMOS18, PULL_MODE=UP;
+// On-board LEDs (active low)
+IO_LOC  "led[0]" 15;
+IO_LOC  "led[1]" 16;
+IO_LOC  "led[2]" 17;
+IO_LOC  "led[3]" 18;
+IO_LOC  "led[4]" 19;
+IO_LOC  "led[5]" 20;
+IO_PORT "led[0]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8;
+IO_PORT "led[1]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8;
+IO_PORT "led[2]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8;
+IO_PORT "led[3]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8;
+IO_PORT "led[4]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8;
+IO_PORT "led[5]" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8;
 
-// LEDs (ativo baixo)
-IO_LOC "led[0]" L3;
-IO_PORT "led[0]" IO_TYPE=LVCMOS18, DRIVE=8;
-IO_LOC "led[1]" L4;
-IO_PORT "led[1]" IO_TYPE=LVCMOS18, DRIVE=8;
+// HDMI connector (differential pairs: "P,N")
+IO_LOC  "tmds_clk_p"  33,34;
+IO_PORT "tmds_clk_p"  PULL_MODE=NONE DRIVE=8;
+IO_LOC  "tmds_d_p[0]" 35,36;
+IO_PORT "tmds_d_p[0]" PULL_MODE=NONE DRIVE=8;
+IO_LOC  "tmds_d_p[1]" 37,38;
+IO_PORT "tmds_d_p[1]" PULL_MODE=NONE DRIVE=8;
+IO_LOC  "tmds_d_p[2]" 39,40;
+IO_PORT "tmds_d_p[2]" PULL_MODE=NONE DRIVE=8;
 
-// ---------------------------------------------------------------------------
-// HDMI (conector onboard)
-// TMDS diferenciado — usar ELVDS_OBUF + OSER10
-// ---------------------------------------------------------------------------
-IO_LOC "tmds_clk_p" H5;
-IO_LOC "tmds_clk_n" G5;
-IO_PORT "tmds_clk_p" IO_TYPE=LVCMOS33D, PULL_MODE=NONE, DRIVE=8;
-IO_PORT "tmds_clk_n" IO_TYPE=LVCMOS33D, PULL_MODE=NONE, DRIVE=8;
+// microSD slot (SPI mode: CMD = MOSI, DAT0 = MISO, DAT3 = CS)
+IO_LOC  "sd_clk"  83;
+IO_PORT "sd_clk"  IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8;
+IO_LOC  "sd_mosi" 82;
+IO_PORT "sd_mosi" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8;
+IO_LOC  "sd_miso" 84;
+IO_PORT "sd_miso" IO_TYPE=LVCMOS33 PULL_MODE=UP;
+IO_LOC  "sd_cs_n" 81;
+IO_PORT "sd_cs_n" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8;
 
-IO_LOC "tmds_d0_p" J3;
-IO_LOC "tmds_d0_n" J4;
-IO_PORT "tmds_d0_p" IO_TYPE=LVCMOS33D, PULL_MODE=NONE, DRIVE=8;
-IO_PORT "tmds_d0_n" IO_TYPE=LVCMOS33D, PULL_MODE=NONE, DRIVE=8;
-
-IO_LOC "tmds_d1_p" H4;
-IO_LOC "tmds_d1_n" H3;
-IO_PORT "tmds_d1_p" IO_TYPE=LVCMOS33D, PULL_MODE=NONE, DRIVE=8;
-IO_PORT "tmds_d1_n" IO_TYPE=LVCMOS33D, PULL_MODE=NONE, DRIVE=8;
-
-IO_LOC "tmds_d2_p" F5;
-IO_LOC "tmds_d2_n" E5;
-IO_PORT "tmds_d2_p" IO_TYPE=LVCMOS33D, PULL_MODE=NONE, DRIVE=8;
-IO_PORT "tmds_d2_n" IO_TYPE=LVCMOS33D, PULL_MODE=NONE, DRIVE=8;
-
-// ---------------------------------------------------------------------------
-// SD Card (slot onboard)
-// ---------------------------------------------------------------------------
-IO_LOC "sd_clk"  D8;
-IO_PORT "sd_clk" IO_TYPE=LVCMOS33, DRIVE=8, PULL_MODE=NONE;
-
-IO_LOC "sd_mosi" B11;
-IO_PORT "sd_mosi" IO_TYPE=LVCMOS33, DRIVE=8, PULL_MODE=NONE;
-
-IO_LOC "sd_miso" A11;
-IO_PORT "sd_miso" IO_TYPE=LVCMOS33, PULL_MODE=UP;
-
-IO_LOC "sd_cs_n" B12;
-IO_PORT "sd_cs_n" IO_TYPE=LVCMOS33, DRIVE=8, PULL_MODE=NONE;
-
-// ---------------------------------------------------------------------------
-// Teclado PS/2 (PMOD 1 — conector esquerdo)
-// Pin 1 (GPIO38) = PS2_CLK
-// Pin 2 (GPIO39) = PS2_DAT
-// ---------------------------------------------------------------------------
-IO_LOC "ps2_clk" M11;
-IO_PORT "ps2_clk" IO_TYPE=LVCMOS33, PULL_MODE=UP;
-
-IO_LOC "ps2_dat" N11;
-IO_PORT "ps2_dat" IO_TYPE=LVCMOS33, PULL_MODE=UP;
-
-// ---------------------------------------------------------------------------
-// Saída de áudio PDM (PMOD 1, pino 3)
-// ---------------------------------------------------------------------------
-IO_LOC "audio_pdm" M10;
-IO_PORT "audio_pdm" IO_TYPE=LVCMOS33, DRIVE=8;
-
+// PS/2 keyboard and PDM audio on the side headers.
+// CHECK THESE AGAINST YOUR BOARD before wiring anything: any free 3.3 V
+// header GPIO works, just change the numbers here.
+IO_LOC  "ps2_clk"   76;
+IO_PORT "ps2_clk"   IO_TYPE=LVCMOS33 PULL_MODE=UP;
+IO_LOC  "ps2_dat"   77;
+IO_PORT "ps2_dat"   IO_TYPE=LVCMOS33 PULL_MODE=UP;
+IO_LOC  "audio_pdm" 75;
+IO_PORT "audio_pdm" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=8;

@@ -7,7 +7,7 @@ msx1-tang-nano-20k
 
 ## Description (160 chars max)
 ```
-Complete MSX1 computer in Verilog for Tang Nano 20K FPGA — Z80, TMS9918A VDP, AY-3-8910 PSG, HDMI, PS/2 keyboard, SD card. ~$20 total cost!
+MSX1 computer in Verilog for the Tang Nano 20K FPGA — Z80, TMS9918A VDP, AY-3-8910 PSG, HDMI, PS/2 keyboard, 64 KB RAM in SDRAM.
 ```
 
 ## Topics (add these in GitHub repository settings)
