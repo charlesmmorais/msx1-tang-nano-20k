@@ -1,3 +1,5 @@
+> ⚠️ **Cette traduction n'est plus à jour.** Le design a été réécrit (CPU tv80, SDRAM, nouveau VDP, nouveau brochage). Voir [README.md](README.md) (anglais) ou [README.pt-BR.md](README.pt-BR.md) pour les informations correctes.
+
 <div align="center">
 
 # 🖥️ MSX1 sur Tang Nano 20K

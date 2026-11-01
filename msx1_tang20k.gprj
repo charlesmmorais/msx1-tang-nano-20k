@@ -3,99 +3,26 @@
 <Project>
  <Template>FPGA</Template>
  <Version>5</Version>
- <Date/>
- <Device version="V1.9.10.02">GW2AR-LV18QN88C8/I7</Device>
+ <Device name="GW2AR-18C" pn="GW2AR-LV18QN88C8/I7">gw2ar18c-000</Device>
  <FileList>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/top.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/pll_108m.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/pll_135m.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/cpu/z80_alu.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/cpu/z80_cpu.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/vdp/tms9918a.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/psg/ay8910.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/ppi/ppi8255.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/keyboard/ps2_decoder.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/keyboard/msx_keymap.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/sdcard/spi_master.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/sdcard/sd_ctrl.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/memory/slot_ctrl.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/video/tmds_encoder.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/video/hdmi_out.v</string>
-  </File>
-  <File>
-   <type>Verilog</type>
-   <filter>syn,impl</filter>
-   <string>src/audio/pdm_dac.v</string>
-  </File>
-  <File>
-   <type>CST</type>
-   <filter>impl</filter>
-   <string>constraints/tang_nano_20k.cst</string>
-  </File>
+  <File path="src/top.v" type="file.verilog" enable="1"/>
+  <File path="src/pll_135m.v" type="file.verilog" enable="1"/>
+  <File path="src/cpu/tv80_msx.v" type="file.verilog" enable="1"/>
+  <File path="src/cpu/tv80/tv80_core.v" type="file.verilog" enable="1"/>
+  <File path="src/cpu/tv80/tv80_alu.v" type="file.verilog" enable="1"/>
+  <File path="src/cpu/tv80/tv80_mcode.v" type="file.verilog" enable="1"/>
+  <File path="src/cpu/tv80/tv80_reg.v" type="file.verilog" enable="1"/>
+  <File path="src/memory/slot_ctrl.v" type="file.verilog" enable="1"/>
+  <File path="src/memory/sdram_ctrl.v" type="file.verilog" enable="1"/>
+  <File path="src/vdp/tms9918a.v" type="file.verilog" enable="1"/>
+  <File path="src/video/tmds_encoder.v" type="file.verilog" enable="1"/>
+  <File path="src/video/hdmi_out.v" type="file.verilog" enable="1"/>
+  <File path="src/psg/ay8910.v" type="file.verilog" enable="1"/>
+  <File path="src/ppi/ppi8255.v" type="file.verilog" enable="1"/>
+  <File path="src/keyboard/ps2_decoder.v" type="file.verilog" enable="1"/>
+  <File path="src/keyboard/msx_keymap.v" type="file.verilog" enable="1"/>
+  <File path="src/sdcard/sd_spi.v" type="file.verilog" enable="1"/>
+  <File path="src/audio/pdm_dac.v" type="file.verilog" enable="1"/>
+  <File path="constraints/tang_nano_20k.cst" type="file.cst" enable="1"/>
  </FileList>
- <Synthesis>
-  <TopModule>top</TopModule>
-  <Vendor>Synplify Pro</Vendor>
-  <Frequency>108</Frequency>
-  <Status>enable</Status>
- </Synthesis>
 </Project>

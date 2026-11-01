@@ -6,11 +6,11 @@
 `default_nettype none
 
 module tmds_encoder (
-    input         clk,
-    input         rst,
-    input  [7:0]  data,     // 8-bit pixel data
-    input  [1:0]  ctrl,     // 2-bit sync control
-    input         de,       // display enable (1=dados, 0=controle)
+    input  wire clk,
+    input  wire rst,
+    input  wire [7:0]  data,     // 8-bit pixel data
+    input  wire [1:0]  ctrl,     // 2-bit sync control
+    input  wire de,       // display enable (1=dados, 0=controle)
     output reg [9:0] tmds   // 10-bit TMDS output
 );
 
@@ -57,9 +57,6 @@ always @(posedge clk) begin
         endcase
         disp_cnt <= 5'sd0;
     end else begin
-        reg signed [4:0] diff;
-        diff = $signed({1'b0, n1_qm}) - $signed({1'b0, n0_qm});
-
         if (disp_cnt == 5'sd0 || n1_qm == n0_qm) begin
             if (!q_m[8]) begin
                 tmds     <= {2'b10, ~q_m[7:0]};

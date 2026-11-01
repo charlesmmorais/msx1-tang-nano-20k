@@ -1,4 +1,4 @@
-name: Verilog Lint
+name: Simulation
 
 on:
   push:
@@ -7,59 +7,16 @@ on:
     branches: [ main ]
 
 jobs:
-  lint:
+  sim:
     runs-on: ubuntu-latest
-    name: Lint Verilog Files
-
+    name: System simulation (Icarus Verilog)
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install Icarus Verilog
-      run: sudo apt-get install -y iverilog
+      - name: Install Icarus Verilog
+        run: sudo apt-get update && sudo apt-get install -y iverilog
 
-    - name: Syntax check all Verilog files
-      run: |
-        echo "Checking Verilog syntax..."
-        ERRORS=0
-        for f in $(find src -name "*.v"); do
-          echo "Checking: $f"
-          if ! iverilog -t null -Wall "$f" 2>/dev/null; then
-            echo "  ❌ Syntax error in $f"
-            ERRORS=$((ERRORS + 1))
-          else
-            echo "  ✅ OK"
-          fi
-        done
-        echo ""
-        if [ $ERRORS -gt 0 ]; then
-          echo "❌ $ERRORS file(s) have syntax errors"
-          exit 1
-        else
-          echo "✅ All files passed syntax check"
-        fi
-
-    - name: Check file structure
-      run: |
-        echo "Checking project file structure..."
-        REQUIRED=(
-          "src/top.v"
-          "src/cpu/z80_cpu.v"
-          "src/cpu/z80_alu.v"
-          "src/vdp/tms9918a.v"
-          "src/psg/ay8910.v"
-          "src/ppi/ppi8255.v"
-          "src/keyboard/ps2_decoder.v"
-          "src/keyboard/msx_keymap.v"
-          "src/video/tmds_encoder.v"
-          "src/video/hdmi_out.v"
-          "src/audio/pdm_dac.v"
-          "constraints/tang_nano_20k.cst"
-        )
-        for f in "${REQUIRED[@]}"; do
-          if [ ! -f "$f" ]; then
-            echo "❌ Missing: $f"
-            exit 1
-          fi
-          echo "✅ Found: $f"
-        done
+      - name: Run the system testbench
+        run: |
+          sh sim/run.sh | tee sim.log
+          grep -q '^PASS' sim.log

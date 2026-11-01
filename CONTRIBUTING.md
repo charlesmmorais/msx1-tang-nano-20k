@@ -22,7 +22,7 @@ Thank you for your interest in contributing! 🎮
 ### Commit Messages
 ```
 feat: add MSX2 V9938 VDP mode
-fix: correct Z80 DAA instruction carry flag
+fix: correct sprite early-clock offset
 docs: add wiring diagram for PS/2 adapter
 test: add simulation for sprite overflow
 ```
@@ -30,8 +30,9 @@ test: add simulation for sprite overflow
 ### Pull Request Process
 1. Fork the repo and create a branch from `main`
 2. Make your changes with clear commit messages
-3. Update documentation if needed
-4. Open a PR describing what changed and why
+3. Run the system simulation: `sh sim/run.sh` must print `PASS`
+4. Update documentation if needed
+5. Open a PR describing what changed and why
 
 ## Reporting Bugs
 
@@ -47,7 +48,8 @@ Include:
 - [ ] MSX2 VDP (V9938) upgrade
 - [ ] FM audio (YM2413/OPL)
 - [ ] Expanded slot support
-- [ ] Simulation testbench
+- [ ] More testbenches (VDP modes, PSG output, C-BIOS boot)
+- [ ] Cartridge slot (ROM loading from SD or flash)
 - [ ] MSX-DOS / Nextor disk controller
 - [ ] Joystick port (DB9)
 - [ ] Cassette interface

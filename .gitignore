@@ -45,3 +45,11 @@ bios/*.ROM
 *.lxt
 *.fst
 sim/waves/
+
+# Generated ROM image (build it with tools/make_rom.py)
+bios/msx_rom.mem
+
+# Simulation build products
+sim/*.vvp
+sim/test_rom.mem
+sim/frame.ppm
