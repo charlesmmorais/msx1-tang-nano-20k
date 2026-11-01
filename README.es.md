@@ -1,245 +1,242 @@
-> ⚠️ **Esta traducción está desactualizada.** El diseño fue reescrito (CPU tv80, SDRAM, nuevo VDP, nuevos pines). Consulte [README.md](README.md) (inglés) o [README.pt-BR.md](README.pt-BR.md) para la información correcta.
-
 <div align="center">
 
-# 🖥️ MSX1 en Tang Nano 20K
+# MSX1 en Tang Nano 20K
 
-### Un ordenador MSX1 completamente funcional implementado en Verilog en una placa FPGA de $20
+### Un ordenador MSX1 en Verilog para la Sipeed Tang Nano 20K (Gowin GW2AR-18C)
 
-[![Licencia: MIT](https://img.shields.io/badge/Licencia-MIT-yellow.svg)](LICENSE)
-[![Verilog](https://img.shields.io/badge/HDL-Verilog-blue.svg)](src/)
-[![FPGA](https://img.shields.io/badge/FPGA-Gowin%20GW2AR--18-orange.svg)](https://www.gowinsemi.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![HDL](https://img.shields.io/badge/HDL-Verilog-blue.svg)](src/)
+[![FPGA](https://img.shields.io/badge/FPGA-Gowin%20GW2AR--18C-orange.svg)](https://www.gowinsemi.com/)
+[![Board](https://img.shields.io/badge/Board-Tang%20Nano%2020K-green.svg)](https://wiki.sipeed.com/hardware/en/tang/tang-nano-20k/nano-20k.html)
 
-**Leer en otros idiomas:** [🇺🇸 English](README.md) · [🇧🇷 Português](README.pt-BR.md) · [🇫🇷 Français](README.fr.md) · [🇮🇹 Italiano](README.it.md)
+**Leer en:** [English](README.md) · [Português](README.pt-BR.md) · [Français](README.fr.md) · [Italiano](README.it.md)
 
 </div>
 
 ---
 
-## 🎮 ¿Qué es el MSX?
+## Estado
 
-El **MSX** es una arquitectura de microordenador estandarizada creada en **1983** por **ASCII Corporation** y **Microsoft**, ampliamente adoptada en Japón, España, Países Bajos, Brasil y Oriente Medio.
+| Comprobación | Resultado |
+|---|---|
+| Síntesis + place & route (Gowin EDA 1.9.12) | ✅ bitstream generado, timing cumplido (Fmax 54 MHz para un diseño de 27 MHz) |
+| Simulación del sistema (Icarus Verilog, `sim/run.sh`) | ✅ pasa: RAM, pila, VRAM, imagen del VDP, sprites, PSG, PPI, teclado, interrupciones |
+| Arranque de C-BIOS en hardware real | ⏳ **todavía no probado** |
 
-El estándar MSX definió hardware común para que el software funcionara en cualquier máquina MSX, sin importar el fabricante (Sony, Philips, Panasonic, Canon, Toshiba…). En España fue especialmente popular, con modelos de Philips y Sony.
+El diseño compila y simula, pero aún no se ha ejecutado en una placa.
+Los informes de quien lo pruebe son muy bienvenidos (abra una Issue).
 
-### Especificaciones del MSX1
+## Qué incluye
 
-| Componente | Especificación |
-|------------|---------------|
-| CPU | Zilog Z80A @ 3,579 MHz |
-| Vídeo | Texas Instruments TMS9918A |
-| Audio | General Instrument AY-3-8910 |
-| RAM | Mínimo 8KB (implementamos 64KB) |
-| ROM | 32KB BIOS + 16KB BASIC |
-| VRAM | 16KB |
-| Colores | 15 + transparente |
-| Resolución | 256×192 (gráficos) / 40×24 (texto) |
-| Sprites | 32 sprites, 8×8 ó 16×16 |
+| Parte | Implementación |
+|---|---|
+| CPU | Z80 a 3,579545 MHz — núcleo [tv80](https://github.com/hutch31/tv80) (port en Verilog del T80, MIT). Un estado de espera en M1, como en un MSX real. |
+| Vídeo | TMS9918A: Graphics I, Graphics II, Multicolor, Texto. 32 sprites (8×8/16×16, ampliados, early clock), 4 por línea, flags de 5º sprite y colisión. |
+| Salida de vídeo | HDMI/DVI 720×480p 59,94 Hz. La imagen de 256×192 se duplica a 512×384 y se centra. |
+| Sonido | AY-3-8910 (3 tonos, ruido, envolvente) + clic de teclado, salida sigma-delta (PDM) en 1 pin |
+| PPI | i8255: selección de slot, matriz de teclado, LED de CAPS, clic |
+| ROM | 48 KB en block RAM, slot 0 (C-BIOS principal + logo, o BIOS+BASIC de un MSX1) |
+| RAM | 64 KB en la SDRAM integrada del GW2AR, slot 3 |
+| Teclado | PS/2, mapeado a la matriz internacional del MSX |
+| microSD | puerto SPI simple (el protocolo de la tarjeta lo hace el software del MSX; aún sin driver de disco) |
 
----
+## Hardware
 
-## ⚡ ¿Qué es una FPGA?
+- Sipeed Tang Nano 20K
+- Monitor/TV HDMI (que acepte 720×480p)
+- Teclado PS/2 (o un teclado USB que todavía hable PS/2, con adaptador)
+- Audio: un filtro RC en el pin de audio (p. ej. 1 kΩ + 10 nF) y un condensador de acoplo (p. ej. 1 µF) hacia un amplificador
+- Opcional: tarjeta microSD
 
-Una **FPGA** (Field-Programmable Gate Array — Matriz de Puertas Programable en Campo) es un chip que puedes programar para **convertirse en cualquier circuito digital** — incluyendo un ordenador completo de los años 80.
+## Pines
 
-En lugar de software ejecutándose en un procesador fijo, una FPGA implementa la **lógica de hardware real** en paralelo. Cada componente del MSX (CPU, VDP, PSG, PPI) funciona simultáneamente, exactamente como en la máquina original.
+Todo en [constraints/tang_nano_20k.cst](constraints/tang_nano_20k.cst).
 
----
+| Señal | Pin | Notas |
+|---|---|---|
+| Reloj 27 MHz | 4 | en la placa |
+| Reset (S1) | 88 | botón de la placa |
+| LEDs 0–5 | 15–20 | CAPS, SD, HALT, SDRAM no lista, latido, reset |
+| HDMI | 33–40 | conector de la placa |
+| microSD | 81–84 | ranura de la placa |
+| PS/2 reloj | 76 | **tira de pines lateral — compruébelo antes de cablear** |
+| PS/2 datos | 77 | **tira de pines lateral — compruébelo antes de cablear** |
+| Audio PDM | 75 | **tira de pines lateral — compruébelo antes de cablear** |
 
-## 🛒 Componentes Necesarios
+La Tang Nano 20K no tiene conector PMOD. Los pines de PS/2 y audio son GPIO
+libres de 3,3 V en las tiras laterales; compruébelos con el pinout de Sipeed
+para la revisión de su placa y cambie el `.cst` si hace falta. Los teclados
+PS/2 son de 5 V: la mayoría funciona a 3,3 V; si el suyo no, use un
+adaptador de nivel.
 
-| Componente | Uso | Coste (aprox.) |
-|------------|-----|----------------|
-| Tang Nano 20K | Placa FPGA principal | ~20€ |
-| Teclado PS/2 (o adaptador USB→PS/2) | Entrada | ~5€ |
-| Monitor o TV HDMI | Pantalla | — |
-| Tarjeta microSD | Almacenamiento | ~3€ |
-| Protoboard + cables jumper | Conexiones | ~3€ |
-| 2× resistencias 4,7kΩ | Pull-up PS/2 | ~0,10€ |
-| 1× 100Ω + 1× 10µF | Filtro de audio | ~0,20€ |
+## Primeros pasos
 
----
+### 1. Crear la imagen de la ROM
 
-## 🏗️ Arquitectura del Sistema
-
-### 🔵 CPU Z80
-
-El **Zilog Z80** es el corazón del MSX. Nuestra implementación es una **máquina de estados multi-ciclo** en Verilog puro.
-
-#### Ciclos de Máquina:
-
-```
-FETCH (M1):  ┌─T1─┬─T2─┬─T3─┬─T4─┐
-              │ PC→ │    │Rfsh│    │  Lee opcode de memoria
-              └────┴────┴────┴────┘
-
-LECTURA:     ┌─T1─┬─T2─┬─T3─┐
-              │ Dir│    │Dato│
-              └────┴────┴────┘
-
-E/S:         ┌─T1─┬─T2─┬─TW─┬─T3─┬─T4─┐
-              │Puerto│  │Esp.│Dato│    │
-              └────┴────┴────┴────┴────┘
-```
-
-#### Grupos de Instrucciones:
-
-| Prefijo | Grupo | Ejemplos |
-|---------|-------|---------|
-| (ninguno) | Conjunto principal | `LD A,B` `ADD A,n` `JP nn` |
-| `CB` | Operaciones de bits | `RLC r` `BIT b,r` `SET b,r` |
-| `DD` | Registro IX | `LD IX,nn` `LD r,(IX+d)` |
-| `FD` | Registro IY | `LD IY,nn` `LD (IY+d),r` |
-| `ED` | Extendido | `LDIR` `LDDR` `IM 2` `ADC HL,rp` |
-
-### 🟢 VDP TMS9918A
-
-#### Modos de Vídeo:
-
-| Modo | BASIC | Descripción |
-|------|-------|-------------|
-| Screen 0 | `SCREEN 0` | Texto 40×24 columnas |
-| Screen 1 | `SCREEN 1` | Gráficos I, tiles 32×24 |
-| Screen 2 | `SCREEN 2` | Mapa de bits 256×192 px |
-| Screen 3 | `SCREEN 3` | Multicolor 64×48 bloques |
-
-#### Paleta de 15 Colores:
-
-```
- 0: Transparente   4: Azul oscuro    8: Rojo medio    12: Verde oscuro
- 1: Negro          5: Azul claro     9: Rojo claro    13: Magenta
- 2: Verde medio    6: Rojo oscuro   10: Amarillo osc  14: Gris
- 3: Verde claro    7: Cian          11: Amarillo cla  15: Blanco
-```
-
-### 🔴 PSG AY-3-8910
-
-3 canales de onda cuadrada + generador de ruido LFSR 17 bits + envolvente.
-
-```
-Fórmula de frecuencia: f = f_clk / (16 × N)
-f_clk = 1,789 MHz
-Ejemplo La (440 Hz): N ≈ 254
-```
-
-### 🟡 PPI Intel 8255
-
-- **Puerto A** → Selección de slot por página
-- **Puerto B** ← Columnas del teclado MSX (lectura)
-- **Puerto C** → Fila del teclado + LED Caps + casete
-
-### 🟠 Sistema de Slots
-
-```
-Página 3 (0xC000–0xFFFF): PPI_A[7:6] → normalmente RAM
-Página 2 (0x8000–0xBFFF): PPI_A[5:4] → normalmente BASIC ROM
-Página 1 (0x4000–0x7FFF): PPI_A[3:2] → BIOS ROM alta
-Página 0 (0x0000–0x3FFF): PPI_A[1:0] → BIOS ROM baja
-```
-
----
-
-## ⏱️ Arquitectura de Reloj
-
-```
-Cristal 27 MHz
-    ├── PLL1 × 4 = 108 MHz (sistema)
-    │       ├── ÷30 = 3,6 MHz → Z80 CPU
-    │       ├── ÷60 = 1,8 MHz → PSG
-    │       └── ÷4  = 27 MHz  → VDP pixel
-    └── PLL2 × 5 = 135 MHz → TMDS HDMI
-```
-
----
-
-## 🚀 Primeros Pasos
-
-### Paso 1 — Instalar Gowin EDA
-🔗 https://www.gowinsemi.com/en/support/download_eda/
-
-### Paso 2 — Obtener la BIOS (C-BIOS, open source)
+La ROM no está en el repositorio. [C-BIOS](https://cbios.sourceforge.net/) es una BIOS de MSX libre:
 
 ```bash
-wget https://sourceforge.net/projects/cbios/files/cbios-0.29a.zip
-unzip cbios-0.29a.zip
-python3 tools/convert_rom.py cbios_main_msx1.rom bios/cbios_main_msx1.mem
+python3 tools/make_rom.py cbios_main_msx1.rom cbios_logo_msx1.rom
 ```
 
-### Paso 3 — Clonar y compilar
+O, si tiene la ROM de sistema de un MSX1 (32 KB, BIOS + BASIC):
 
 ```bash
-git clone https://github.com/TU_USUARIO/msx1-tang-nano-20k.git
-cd msx1-tang-nano-20k
+python3 tools/make_rom.py msx1.rom
 ```
 
-Abrir `msx1_tang20k.gprj` en Gowin EDA → Synthesize → Place & Route → Program.
+Ambos generan `bios/msx_rom.mem`, que lee el build.
 
----
+### 2. Compilar
 
-## 🔌 Conexiones de Hardware
+Con el IDE de Gowin EDA: abra `msx1_tang20k.gprj` y ejecute *Place & Route*.
+En *Project → Configuration → Dual-Purpose Pin*, habilite MSPI, SSPI, READY y DONE como E/S normal.
 
-### Teclado PS/2 (PMOD1)
+O desde la línea de comandos (con Gowin EDA instalado):
 
-```
-PS/2 Pin 5 (CLK)  ── 4,7kΩ ──┬── PMOD1 Pin 1
-                              └── 3,3V (pull-up)
-
-PS/2 Pin 1 (DATA) ── 4,7kΩ ──┬── PMOD1 Pin 2
-                              └── 3,3V (pull-up)
-
-PS/2 Pin 4 (VCC)  ─────────────── PMOD1 Pin 6 (+3,3V)
-PS/2 Pin 3 (GND)  ─────────────── PMOD1 Pin 5 (GND)
+```bash
+gw_sh scripts/build.tcl
 ```
 
-### Audio (PMOD1 Pin 3)
+El bitstream queda en `impl/pnr/msx1_tang20k.fs`.
+
+### 3. Programar la placa
+
+Con [openFPGALoader](https://github.com/trabucayre/openFPGALoader):
+
+```bash
+openFPGALoader -b tangnano20k impl/pnr/msx1_tang20k.fs
+```
+
+Añada `-f` para grabarlo en la flash y conservarlo al apagar. El Gowin
+Programmer también sirve.
+
+### 4. Simular (opcional)
+
+Necesita [Icarus Verilog](https://steveicarus.github.io/iverilog/) y Python 3:
+
+```bash
+sh sim/run.sh
+```
+
+Ejecuta un pequeño programa Z80 de prueba ([sim/make_test_rom.py](sim/make_test_rom.py))
+en toda la máquina, con un modelo de la SDRAM, y guarda un cuadro HDMI en
+`sim/frame.ppm`. La misma prueba se ejecuta en GitHub Actions en cada push.
+
+## Cómo funciona
+
+### Relojes
 
 ```
-Pin FPGA ── 100Ω ──┬── Jack 3,5mm (+)
-                   10µF
-                   GND ── Jack 3,5mm (-)
+cristal 27 MHz ─► rPLL ─► 135 MHz ──────────────► OSER10 (serializadores HDMI)
+                             └─► CLKDIV /5 ─► 27 MHz  = reloj de píxel = reloj del sistema
+                                                ├─ clock enable de la CPU  3,579545 MHz
+                                                ├─ clock enable del PSG    1,789773 MHz
+                                                └─ reloj de la SDRAM (invertido)
 ```
 
----
+Todo funciona en un único dominio de 27 MHz, sin cruces entre dominios de
+reloj. El clock enable de la CPU sale de un acumulador de fase, así que su
+media es exactamente 3,579545 MHz.
 
-## 📊 Mapa de Puertos I/O
+### Mapa de memoria (slots primarios, elegidos con el puerto A del PPI / E/S A8h)
 
-| Puerto | Dispositivo | Acceso | Descripción |
-|--------|-------------|--------|-------------|
-| `0x98` | VDP | R/W | Datos VRAM |
-| `0x99` | VDP | R/W | Registro / Estado |
-| `0xA0`–`0xA2` | PSG | R/W | Sonido AY-3-8910 |
-| `0xA8`–`0xAB` | PPI | R/W | Teclado + slots |
-| `0x40`–`0x47` | SD Card | R/W | Tarjeta SD SPI |
+| Página | Slot 0 | Slot 1 | Slot 2 | Slot 3 |
+|---|---|---|---|---|
+| 0000–3FFF | ROM | – | – | RAM |
+| 4000–7FFF | ROM | – | – | RAM |
+| 8000–BFFF | ROM (logo / BASIC) | – | – | RAM |
+| C000–FFFF | – | – | – | RAM |
 
----
+El espacio vacío se lee como FFh. Los slots expandidos no están implementados.
 
-## ⚠️ Limitaciones Conocidas
+### Mapa de E/S
 
-| Función | Estado |
-|---------|--------|
-| CPU Z80 completa | ✅ Todos los grupos |
-| Pantallas 0–3 | ✅ Implementadas |
-| Sprites | ✅ 32 sprites |
-| PSG (sonido) | ✅ 3 canales |
-| Teclado PS/2 | ✅ Teclas principales |
-| HDMI 720×480p | ✅ Funcionando |
-| SD Card | ✅ Lectura SPI |
-| MSX-DOS / Nextor | ❌ No implementado |
-| Ranura de cartucho | ❌ Devuelve 0xFF |
-| Puerto joystick | ❌ No implementado |
+| Puerto | Dispositivo |
+|---|---|
+| 40h–41h | SPI de la microSD (datos, control/estado) — vea [src/sdcard/sd_spi.v](src/sdcard/sd_spi.v) |
+| 98h–99h | VDP (datos de VRAM, control/estado) |
+| A0h–A2h | PSG (dirección, escritura, lectura) |
+| A8h–ABh | PPI (slots, teclado, puerto C, control) |
 
----
+### SDRAM
 
-## 📚 Referencias
+El GW2AR-18C lleva una SDRAM de 64 Mbit en el mismo encapsulado. Sus pines
+tienen nombres fijos (`O_sdram_*`, `IO_sdram_dq`) y no necesitan constraints.
+[src/memory/sdram_ctrl.v](src/memory/sdram_ctrl.v) hace un byte por acceso
+(ACTIVATE + READ/WRITE con auto-precharge, CAS latency 2) y refresca cada
+14 µs. La CPU queda en WAIT hasta que termina cada acceso. En simulación un
+acceso cabe dentro del ciclo de bus normal del Z80, así que la RAM no añade
+estados de espera (solo el primer acceso espera ~0,3 ms al arranque de la SDRAM).
 
-- [MSX Technical Handbook](https://konamiman.github.io/MSX2-Technical-Handbook/)
-- [C-BIOS](https://cbios.sourceforge.net/)
-- [Tang Nano 20K Wiki](https://wiki.sipeed.com/hardware/en/tang/tang-nano-20k/nano-20k.html)
+### VDP
 
-<div align="center">
+Los 16 KB de VRAM son una block RAM de doble puerto (la CPU en un puerto, el
+renderizador en el otro). Cada línea del TMS se dibuja en un pequeño búfer de
+línea durante las dos líneas HDMI anteriores (primero el fondo, luego hasta 4
+sprites), así que la VRAM se lee un byte por ciclo en lugar de muchos a la vez.
 
-**Hecho con ❤️ para la comunidad MSX y FPGA**
+### Recursos de la FPGA (Gowin EDA 1.9.12)
 
-⭐ ¡Si este proyecto te ha ayudado, dale una estrella en GitHub! ⭐
+| Recurso | Usado | Disponible |
+|---|---|---|
+| Lógica (LUT/ALU) | 5.235 | 20.736 (26%) |
+| Registros | 1.666 | 15.915 (11%) |
+| Block RAM (BSRAM) | 33 | 46 (72%) |
+| rPLL | 1 | 2 |
 
-</div>
+## Archivos
+
+```
+src/top.v                  nivel superior, decodificación de E/S, relojes/reset
+src/pll_135m.v             rPLL 27→135 MHz + CLKDIV /5
+src/cpu/tv80_msx.v         envoltorio del Z80 con clock enable
+src/cpu/tv80/              núcleo tv80 (MIT, Guy Hutchison)
+src/memory/slot_ctrl.v     decodificador de slots primarios
+src/memory/sdram_ctrl.v    controlador de la SDRAM integrada
+src/vdp/tms9918a.v         TMS9918A
+src/video/                 codificador TMDS + serializador HDMI
+src/psg/ay8910.v           AY-3-8910
+src/ppi/ppi8255.v          i8255
+src/keyboard/              receptor PS/2 + mapa de teclas MSX
+src/sdcard/sd_spi.v        puerto SPI de la ranura microSD
+src/audio/pdm_dac.v        DAC de audio sigma-delta
+constraints/               asignación de pines
+scripts/build.tcl          build desde la línea de comandos
+sim/                       testbench, modelo de SDRAM, programa de prueba
+tools/make_rom.py          genera bios/msx_rom.mem
+```
+
+## Limitaciones conocidas
+
+- Aún no probado en hardware (vea Estado).
+- Sin slots de cartucho, sin slots expandidos, sin driver Nextor/MSX-DOS para la SD.
+- Sin joystick ni interfaz de casete.
+- VDP: sin los límites de temporización de acceso a la VRAM (el software que
+  dependa de una VRAM lenta puede comportarse distinto); el bit 4/16 KB se ignora.
+- Las teclas PS/2 siguen las teclas del MSX (distribución internacional), no las del PC.
+
+## Hoja de ruta
+
+1. Arrancar C-BIOS en una placa y corregir lo que aparezca.
+2. Cargar ROMs de cartucho (desde la SD o la flash) en el slot 1.
+3. Driver Nextor para el puerto SD.
+4. Joystick (DB9) y entrada de audio de casete.
+
+## Contribuir
+
+Vea [CONTRIBUTING.md](CONTRIBUTING.md). Ejecute `sh sim/run.sh` antes de
+enviar un cambio en el RTL.
+
+## Créditos
+
+- [tv80](https://github.com/hutch31/tv80) de Guy Hutchison, basado en T80 de Daniel Wallner (MIT)
+- Equipo de [C-BIOS](https://cbios.sourceforge.net/), por una BIOS de MSX libre
+- Sipeed y la comunidad Tang Nano por la documentación de la placa
+
+## Referencias
+
+- [MSX2 Technical Handbook](https://konamiman.github.io/MSX2-Technical-Handbook/) (cubre también el hardware del MSX1)
+- [Manual del TMS9918A](http://www.unige.ch/medecine/nouspikel/ti99/tms9918a.htm)
+- [Wiki de la Tang Nano 20K](https://wiki.sipeed.com/hardware/en/tang/tang-nano-20k/nano-20k.html)
+- [Documentación del Gowin GW2AR-18](https://www.gowinsemi.com/en/support/database/)
